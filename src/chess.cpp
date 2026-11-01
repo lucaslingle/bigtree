@@ -42,9 +42,30 @@ ChessState::ChessState()
 ChessState::ChessState(const ChessState &state, std::size_t action)
 : AbstractState(state, action) {
     is_valid_thrower(action);
-    // int start_location = action / 73;
-    // int command = action % 73;
-    // state.board[start_location] = 0;
+
+    int start_location = action / 73;
+    int command = action % 73;
+    // queen like movement
+    if (command < 56) {
+        int direction = command / 7;
+        int magnitude = 1 + (command % 7);
+        // north
+        if (direction == 0) {
+            int row, col;
+            for (int i = 1; i != magnitude + 1; ++i) {
+                row = start_location / 8 + i;
+                col = start_location % 8;
+                if (board[row * 8 + col] != 0)
+                    throw std::invalid_argument("Invalid move.");
+            }
+            if (row < 0 || row >= 8 || col < 0 || col >= 8)
+                throw std::invalid_argument("Invalid move.");
+            board[row * 8 + col] = board[start_location];
+            board[start_location] = 0;
+            return;
+        }
+    }
+
     turn = !get_turn();
     status = compute_status();
 }
