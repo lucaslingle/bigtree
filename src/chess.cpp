@@ -2,7 +2,7 @@
 #include "chess.hpp"
 
 ChessState::ChessState()
-: AbstractState<int, 64 * 73, 64>() {
+: AbstractState<int, 64 * 64, 64>() {
     int row = 0;
     board[row * 8 + 3] = -3;
     board[row * 8 + 4] = -2;
@@ -43,28 +43,10 @@ ChessState::ChessState(const ChessState &state, std::size_t action)
 : AbstractState(state, action) {
     is_valid_thrower(action);
 
-    int start_location = action / 73;
-    int command = action % 73;
-    // queen like movement
-    if (command < 56) {
-        int direction = command / 7;
-        int magnitude = 1 + (command % 7);
-        // north
-        if (direction == 0) {
-            int row, col;
-            for (int i = 1; i != magnitude + 1; ++i) {
-                row = start_location / 8 + i;
-                col = start_location % 8;
-                if (board[row * 8 + col] != 0)
-                    throw std::invalid_argument("Invalid move.");
-            }
-            if (row < 0 || row >= 8 || col < 0 || col >= 8)
-                throw std::invalid_argument("Invalid move.");
-            board[row * 8 + col] = board[start_location];
-            board[start_location] = 0;
-            return;
-        }
-    }
+    int start_location = action / 64;
+    int end_location = action % 64;
+    board[end_location] = board[start_location];
+    board[start_location] = 0;
 
     turn = !get_turn();
     status = compute_status();
@@ -106,12 +88,33 @@ std::ostream& ChessState::print(std::ostream &os) const {
 }
 
 bool ChessState::is_valid(std::size_t action) const {
-    // if (get_status() != InProgress)
-    //     return false;
-    // if (action >= get_num_actions())
-    //     return false;
-    // if (board[0 * 7 + action] != 0)
-    //     return false;
+    if (get_status() != InProgress)
+        return false;
+    if (action >= get_num_actions())
+        return false;
+
+    int start_location = action / 64;
+    int end_location = action % 64;
+    int start_piece = board[start_location];
+    int end_piece = board[end_location];
+    if (start_piece == 0)
+        return false;
+    if (start_piece < 0 && turn)
+        return false;
+    if (start_piece > 0 && !turn)
+        return false;
+
+    // check for piece conditional moves
+    // check for not walking through other pieces (except knight and castling)
+    // check for castling
+    // check for en passant
+    // check for promotion
+    // check for capture
+    // check for check
+    // check for checkmate
+    // check for stalemate
+    // check for threefold repetition
+
     return true;
 }
 

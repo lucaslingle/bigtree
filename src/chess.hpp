@@ -4,7 +4,7 @@
 #include <string>
 #include "state.hpp"
 
-class ChessState : public AbstractState<int, 64 * 73, 64> {
+class ChessState : public AbstractState<int, 64 * 64, 64> {
 public:
     ChessState();
     ChessState(const ChessState &state, std::size_t action);
