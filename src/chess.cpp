@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <stdexcept>
 #include "chess.hpp"
 
@@ -97,15 +98,98 @@ bool ChessState::is_valid(std::size_t action) const {
     int end_location = action % 64;
     int start_piece = board[start_location];
     int end_piece = board[end_location];
+    // blank square of chessboard
     if (start_piece == 0)
         return false;
+    // black piece but white turn, can't move that piece
     if (start_piece < 0 && turn)
         return false;
+    // white piece but black turn, can't move that piece
     if (start_piece > 0 && !turn)
         return false;
 
     // check for piece conditional moves
-    // check for not walking through other pieces (except knight and castling)
+    // queen: moves any number of squares along a rank, file, or diagonal
+    if (start_piece == 3 || start_piece == -3) {
+        int start_row = start_location / 8, start_col = start_location % 8;
+        int end_row = end_location / 8, end_col = end_location % 8;
+        int d_row = end_row - start_row;
+        int d_col = end_col - start_col;
+        // must actually move
+        if (d_row == 0 && d_col == 0)
+            return false;
+        // must be straight (rank/file) or diagonal
+        bool straight = (d_row == 0 || d_col == 0);
+        bool diagonal = (std::abs(d_row) == std::abs(d_col));
+        if (!straight && !diagonal)
+            return false;
+        // can't land on own piece
+        if ((start_piece > 0 && end_piece > 0) || (start_piece < 0 && end_piece < 0))
+            return false;
+        // can't jump over pieces: every square strictly between start and end must be empty
+        int step_row = (d_row > 0) - (d_row < 0);
+        int step_col = (d_col > 0) - (d_col < 0);
+        int row = start_row + step_row, col = start_col + step_col;
+        while (row != end_row || col != end_col) {
+            if (board[row * 8 + col] != 0)
+                return false;
+            row += step_row;
+            col += step_col;
+        }
+    }
+    // rook: moves any number of squares along a rank or file
+    if (start_piece == 6 || start_piece == -6) {
+        int start_row = start_location / 8, start_col = start_location % 8;
+        int end_row = end_location / 8, end_col = end_location % 8;
+        int d_row = end_row - start_row;
+        int d_col = end_col - start_col;
+        // must actually move
+        if (d_row == 0 && d_col == 0)
+            return false;
+        // must be straight (rank/file)
+        if (d_row != 0 && d_col != 0)
+            return false;
+        // can't land on own piece
+        if ((start_piece > 0 && end_piece > 0) || (start_piece < 0 && end_piece < 0))
+            return false;
+        // can't jump over pieces: every square strictly between start and end must be empty
+        int step_row = (d_row > 0) - (d_row < 0);
+        int step_col = (d_col > 0) - (d_col < 0);
+        int row = start_row + step_row, col = start_col + step_col;
+        while (row != end_row || col != end_col) {
+            if (board[row * 8 + col] != 0)
+                return false;
+            row += step_row;
+            col += step_col;
+        }
+    }
+    // bishop: moves any number of squares along a diagonal
+    if (start_piece == 4 || start_piece == -4) {
+        int start_row = start_location / 8, start_col = start_location % 8;
+        int end_row = end_location / 8, end_col = end_location % 8;
+        int d_row = end_row - start_row;
+        int d_col = end_col - start_col;
+        // must actually move
+        if (d_row == 0 && d_col == 0)
+            return false;
+        // must be diagonal
+        if (std::abs(d_row) != std::abs(d_col))
+            return false;
+        // can't land on own piece
+        if ((start_piece > 0 && end_piece > 0) || (start_piece < 0 && end_piece < 0))
+            return false;
+        // can't jump over pieces: every square strictly between start and end must be empty
+        int step_row = (d_row > 0) - (d_row < 0);
+        int step_col = (d_col > 0) - (d_col < 0);
+        int row = start_row + step_row, col = start_col + step_col;
+        while (row != end_row || col != end_col) {
+            if (board[row * 8 + col] != 0)
+                return false;
+            row += step_row;
+            col += step_col;
+        }
+    }
+    // check for knight
     // check for castling
     // check for en passant
     // check for promotion
