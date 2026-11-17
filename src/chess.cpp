@@ -189,7 +189,35 @@ bool ChessState::is_valid(std::size_t action) const {
             col += step_col;
         }
     }
-    // check for knight
+    // knight: moves in an L-shape (2 squares one way, 1 square the other) and can jump over pieces
+    if (start_piece == 5 || start_piece == -5) {
+        int start_row = start_location / 8, start_col = start_location % 8;
+        int end_row = end_location / 8, end_col = end_location % 8;
+        int abs_d_row = std::abs(end_row - start_row);
+        int abs_d_col = std::abs(end_col - start_col);
+        // must be an L-shape
+        if (!((abs_d_row == 2 && abs_d_col == 1) || (abs_d_row == 1 && abs_d_col == 2)))
+            return false;
+        // can't land on own piece
+        if ((start_piece > 0 && end_piece > 0) || (start_piece < 0 && end_piece < 0))
+            return false;
+    }
+    // king: moves exactly one square in any direction (castling handled separately)
+    if (start_piece == 2 || start_piece == -2) {
+        int start_row = start_location / 8, start_col = start_location % 8;
+        int end_row = end_location / 8, end_col = end_location % 8;
+        int abs_d_row = std::abs(end_row - start_row);
+        int abs_d_col = std::abs(end_col - start_col);
+        // must actually move
+        if (abs_d_row == 0 && abs_d_col == 0)
+            return false;
+        // at most one square in each direction
+        if (abs_d_row > 1 || abs_d_col > 1)
+            return false;
+        // can't land on own piece
+        if ((start_piece > 0 && end_piece > 0) || (start_piece < 0 && end_piece < 0))
+            return false;
+    }
     // check for castling
     // check for en passant
     // check for promotion
