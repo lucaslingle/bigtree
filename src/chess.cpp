@@ -195,6 +195,9 @@ bool ChessState::is_valid(std::size_t action) const {
         int end_row = end_location / 8, end_col = end_location % 8;
         int abs_d_row = std::abs(end_row - start_row);
         int abs_d_col = std::abs(end_col - start_col);
+        // must actually move
+        if (abs_d_row == 0 && abs_d_col == 0)
+            return false;
         // must be an L-shape
         if (!((abs_d_row == 2 && abs_d_col == 1) || (abs_d_row == 1 && abs_d_col == 2)))
             return false;
