@@ -4,7 +4,7 @@
 #include <string>
 #include "state.hpp"
 
-class ChessState : public AbstractState<int, 64 * 64, 64> {
+class ChessState : public AbstractState<int, 64, 64 * 64> {
 public:
     ChessState();
     ChessState(const ChessState &state, std::size_t action);
@@ -12,4 +12,8 @@ public:
     bool is_valid(std::size_t action) const override;
     void is_valid_thrower(std::size_t action) const override;
     Status compute_status() const override;
+private:
+    void apply_move(std::size_t action);
+    bool is_pseudo_valid(std::size_t action) const;
+    bool in_check(bool white) const;
 };
